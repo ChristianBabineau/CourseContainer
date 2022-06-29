@@ -4,6 +4,7 @@ from PyQt5.QtGui import QFont
 from Person import Person
 from Course import Course
 from Database import Database
+import qdarkgraystyle
 import sys
 #pyinstaller C:\Users\Christian\Desktop\Work\CourseContainer.py --onefile
 class QPersonWidget(QWidget):
@@ -20,6 +21,7 @@ class QPersonWidget(QWidget):
             cLabel.setMinimumHeight(40)
             vlay.addWidget(cLabel)
             courses=courses+str(c)
+        
         self.courses=QLabel(courses)
         self.layout.addWidget(self.info)
         self.layout.addLayout(vlay)
@@ -41,6 +43,7 @@ class NewPersonAddCourseWidget(QWidget):
             myQListWidgetItem.setSizeHint(t.sizeHint())
             list.addItem(myQListWidgetItem)
             list.setItemWidget(myQListWidgetItem, t)
+
         def submit_clicked():
             global addCoursesToPeopleList
             addCoursesToPeopleList=[]
@@ -59,6 +62,7 @@ class NewPersonAddCourseWidget(QWidget):
         submitButton.clicked.connect(submit_clicked)
         masterLayout.addWidget(submitButton)
         self.setLayout(masterLayout)
+
         for c in courses:
             addcListItem(list,c)
 class NewPersonWidget(QWidget):
@@ -80,6 +84,7 @@ class NewPersonWidget(QWidget):
         def remove_clicked():
             for x in list.selectedItems():
                 list.takeItem(list.row(x))
+            
         def add_course_clicked():
             global windowList
             window=NewPersonAddCourseWidget()
@@ -87,26 +92,31 @@ class NewPersonWidget(QWidget):
             window.setWindowTitle("Course Manager - Add Person - Attach Course")
             window.show()
             windowList.append(window)
+
         def submit_clicked():
             global addCoursesToPeopleList
             db = Database()
+
             while(list.count()>0):
                 list.setCurrentRow(0)
                 p=list.itemWidget(list.currentItem()).person
                 id=db.insertPerson(p.fName,p.initial,p.lName,p.company)
                 for c in addCoursesToPeopleList:
-
                     db.insertM2M(id,c.id)
                 list.takeItem(0)
+            
             self.close()
+
         def company_item_clicked():
             companyLine.clear()
             companyLine.insert(companyList.currentItem().text())
         super().__init__()
-        masterLayout = QVBoxLayout()
+        masterLayout=QHBoxLayout()
+        leftLayout = QVBoxLayout()
         topLayout = QGridLayout()
         midLayout= QHBoxLayout()
         midRightLayout = QVBoxLayout()
+        midFarRightLayout = QVBoxLayout()
         bottomLayout= QVBoxLayout()
         firstNameLabel = QLabel('First Name')
         firstNameLine = QLineEdit()
@@ -144,35 +154,47 @@ class NewPersonWidget(QWidget):
         removeButton.setToolTip("Remove selected people")
         removeButton.clicked.connect(remove_clicked)
         midRightLayout.addWidget(removeButton)
+
         addCourseButton=QPushButton("add course")
         addCourseButton.setToolTip("Add course to all new people")
         addCourseButton.clicked.connect(add_course_clicked)
+
         midRightLayout.addWidget(addCourseButton)
         midRightLayout.setAlignment(Qt.AlignTop)
+
         companyList=QListWidget()
         companyList.itemClicked.connect(company_item_clicked)
         db=Database()
         cList=db.selectUniqueCompany()
         for x in cList:
             companyList.addItem(x)
+
         companyListLabel = QLabel("Company List")
         companyList.setMaximumWidth(100)
         midRightLayout.addWidget(companyListLabel)
         midRightLayout.addWidget(companyList)
-        midLayout.addLayout(midRightLayout)
 
+        addedCoursesLabel = QLabel("Selected Courses")
+        midFarRightLayout.addWidget(addedCoursesLabel)
+        courseList=QListWidget()
+        courseList.setMaximumWidth(150)
+        midFarRightLayout.addWidget(courseList)
+        
+        midLayout.addLayout(midRightLayout)
         submitButton=QPushButton("submit")
         submitButton.setToolTip("Submit list of persons to database")
         submitButton.clicked.connect(submit_clicked)
         bottomLayout.addWidget(submitButton)
 
 
-        masterLayout.addLayout(topLayout)
-        masterLayout.addLayout(midLayout)
-        masterLayout.addLayout(bottomLayout)
+        leftLayout.addLayout(topLayout)
+        leftLayout.addLayout(midLayout)
+        leftLayout.addLayout(bottomLayout)
+        masterLayout.addLayout(leftLayout)
+        masterLayout.addLayout(midFarRightLayout)
         self.setLayout(masterLayout)
-class EditWidget(QWidget):
 
+class EditWidget(QWidget):
     def __init__(self,idIn):
         def update_clicked():
             if firstNameLine.text()!="":
@@ -187,6 +209,7 @@ class EditWidget(QWidget):
             middleInitialLine.setText('')
             lastNameLine.setText('')
             companyLine.setText('')
+
         def remove_clicked():
             if len(assignedCoursesList.selectedItems())<1:
                 return
@@ -201,6 +224,7 @@ class EditWidget(QWidget):
                 finalAddList.remove(c)
             else:
                 finalRemoveList.append(c)
+            
         def add_clicked():
             if len(allCourseList.selectedItems())<1:
                 return
@@ -215,6 +239,7 @@ class EditWidget(QWidget):
                 finalRemoveList.remove(c)
             else:
                 finalAddList.append(c)
+
         def submit_clicked():
             db=Database()
             db.updatePerson(id,firstNameLabel.text(),middleInitialLabel.text(),lastNameLabel.text(),companyLabel.text())
@@ -223,6 +248,7 @@ class EditWidget(QWidget):
             for x in finalRemoveList:
                 db.deleteM2M(id,x.id)
             self.close()
+
         finalAddList=[]
         finalRemoveList=[]
         id=idIn
@@ -421,7 +447,7 @@ class NewCourseWidget(QWidget):
         self.setLayout(masterLayout)
         masterLayout.addWidget(submitButton)
         self.setLayout(masterLayout)
-#↻
+
 global addCoursesToPeopleList
 addCoursesToPeopleList=[]
 global windowList
@@ -631,5 +657,5 @@ masterLayout.addLayout(bottomLayout)
 window.setLayout(masterLayout)
 window.setWindowTitle("Course Manager")
 window.show()
-
+app.setStyleSheet(qdarkgraystyle.load_stylesheet())
 app.exec()

@@ -39,7 +39,7 @@ class Database(object):
         cursor = db1.cursor()
         cursor.execute(pStatement,data)
 
-        ## TODO: change this to make them Objects
+        
         personList=cursor.fetchall()
         personList=list(personList)
         courseList=[]
@@ -53,7 +53,7 @@ class Database(object):
             cursor.execute(statement)
             tCourses=cursor.fetchall()
             tDone=[]
-            #make them all course objects
+            
             for c in tCourses:
                 tempCourse=Course(c[0],c[1],c[2],c[3],c[4])
                 tDone.append(tempCourse)
@@ -255,8 +255,5 @@ class Database(object):
         cursor.execute(sql)
         db1.commit()
 
-        #insertCourse('testCourse3;','2012-12-12',None,'No one')
-        #insertM2M(14,2)
-        #cursor.execute("select FirstName,LastName,courseName from Person, Course,Person_has_Course WHERE Person.ID = Person_has_Course.Person_ID AND course.ID=Person_has_Course.Course_ID;")
-
+        
         db1.close()
