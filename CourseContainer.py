@@ -5,7 +5,7 @@ from Person import Person
 from Course import Course
 from Database import Database
 import qdarkgraystyle
-import sys
+
 #pyinstaller C:\Users\Christian\Desktop\Work\CourseContainer.py --onefile
 class QPersonWidget(QWidget):
     def __init__(self,person):
@@ -35,7 +35,11 @@ class QCourseWidget(QWidget):
         self.setLayout(self.layout)
 
 class NewPersonAddCourseWidget(QWidget):
-
+    def closeEvent(self, event):
+            for w in windowList:
+                if type(w) ==type(NewPersonAddCourseWidget()):
+                    windowList.remove(w)
+                    return
     def __init__(self):
         def addcListItem(list,c):
             t = QCourseWidget(c)
@@ -67,7 +71,11 @@ class NewPersonAddCourseWidget(QWidget):
             addcListItem(list,c)
 class NewPersonWidget(QWidget):
     list
-
+    def closeEvent(self, event):
+            for w in windowList:
+                if type(w) ==type(NewPersonWidget()):
+                    windowList.remove(w)
+                    return
     def __init__(self):
         def add_clicked():
             p=Person(0,firstNameLine.text(),middleInitialLine.text(),lastNameLine.text(),companyLine.text(),[])
@@ -87,6 +95,10 @@ class NewPersonWidget(QWidget):
             
         def add_course_clicked():
             global windowList
+            for w in windowList:
+                if type(w) ==type(NewPersonAddCourseWidget()):
+                    w.activateWindow()
+                    return
             window=NewPersonAddCourseWidget()
             window.setMinimumSize(500,300)
             window.setWindowTitle("Course Manager - Add Person - Attach Course")
@@ -104,13 +116,14 @@ class NewPersonWidget(QWidget):
                 for c in addCoursesToPeopleList:
                     db.insertM2M(id,c.id)
                 list.takeItem(0)
-            
             self.close()
-
+        
         def company_item_clicked():
             companyLine.clear()
             companyLine.insert(companyList.currentItem().text())
+        
         super().__init__()
+        
         masterLayout=QHBoxLayout()
         leftLayout = QVBoxLayout()
         topLayout = QGridLayout()
@@ -357,6 +370,11 @@ class EditWidget(QWidget):
 
 class NewCourseWidget(QWidget):
     list
+    def closeEvent(self, event):
+            for w in windowList:
+                if type(w) ==type(NewCourseWidget()):
+                    windowList.remove(w)
+                    return
     def __init__(self):
         def add_clicked():
             c=Course(0,NameLine.text(),dateTakenLine.text(),expiryLine.text(),instructorLine.text())
@@ -486,6 +504,10 @@ def search_clicked():
     infoLabel.setText("Search complete")
 def add_person_clicked():
     global windowList
+    for window in windowList:
+        if type(window) ==type(NewPersonWidget()):
+            window.activateWindow()
+            return
     w=NewPersonWidget()
     w.setWindowTitle("Course Manager - Add Person")
     w.setMinimumSize(500,350)
@@ -494,6 +516,10 @@ def add_person_clicked():
     infoLabel.setText("")
 def add_course_clicked():
     global windowList
+    for window in windowList:
+        if type(window) ==type(NewCourseWidget()):
+            window.activateWindow()
+            return
     w=NewCourseWidget()
     w.setWindowTitle("Course Manager - Add Course")
     w.setMinimumSize(500,350)
