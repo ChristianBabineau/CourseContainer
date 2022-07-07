@@ -15,7 +15,6 @@ class QPersonWidget(QWidget):
         vlay= QVBoxLayout()
         self.info = QLabel(str(person))
         courses=''
-        #put these into vbox then into main hbox
         for c in person.courseList:
             cLabel=QLabel(str(c))
             cLabel.setMinimumHeight(40)
@@ -36,10 +35,11 @@ class QCourseWidget(QWidget):
 
 class NewPersonAddCourseWidget(QWidget):
     def closeEvent(self, event):
-            for w in windowList:
-                if type(w) ==type(NewPersonAddCourseWidget()):
-                    windowList.remove(w)
-                    return
+        t=NewPersonWidget()
+        for w in windowList:
+            if type(w) ==type(NewPersonAddCourseWidget()):
+                windowList.remove(w)
+                return
     def __init__(self):
         def addcListItem(list,c):
             t = QCourseWidget(c)
@@ -77,6 +77,16 @@ class NewPersonWidget(QWidget):
                     windowList.remove(w)
                     return
     def __init__(self):
+        def updateCourses():
+            courseList.clear()
+            for c in addCoursesToPeopleList:
+                t = QCourseWidget(c)
+                myQListWidgetItem = QListWidgetItem(courseList)
+                myQListWidgetItem.setSizeHint(t.sizeHint())
+                courseList.addItem(myQListWidgetItem)
+                courseList.setItemWidget(myQListWidgetItem, t)
+            self.update()
+
         def add_clicked():
             p=Person(0,firstNameLine.text(),middleInitialLine.text(),lastNameLine.text(),companyLine.text(),[])
             t=QPersonWidget(p)
@@ -92,7 +102,7 @@ class NewPersonWidget(QWidget):
         def remove_clicked():
             for x in list.selectedItems():
                 list.takeItem(list.row(x))
-            
+            updateCourses()
         def add_course_clicked():
             global windowList
             for w in windowList:
@@ -188,9 +198,21 @@ class NewPersonWidget(QWidget):
         midRightLayout.addWidget(companyList)
 
         addedCoursesLabel = QLabel("Selected Courses")
-        midFarRightLayout.addWidget(addedCoursesLabel)
+        refFont=QFont()
+        refFont.setBold(True)
+        refreshButton = QPushButton('⟳')
+        refreshButton.setFont(refFont)
+        refreshButton.setToolTip("Refresh")
+        refreshButton.setMinimumWidth(25)
+        refreshButton.setMaximumWidth(25)
+        refreshButton.clicked.connect(updateCourses)
+        topRightLayout=QHBoxLayout()
+        topRightLayout.addWidget(addedCoursesLabel)
+        topRightLayout.addWidget(refreshButton)
+        midFarRightLayout.addLayout(topRightLayout)
         courseList=QListWidget()
-        courseList.setMaximumWidth(150)
+        courseList.setMinimumWidth(275)
+        courseList.setMaximumWidth(275)
         midFarRightLayout.addWidget(courseList)
         
         midLayout.addLayout(midRightLayout)
@@ -609,7 +631,6 @@ for x in courseList:
 topLayout.addWidget(courseBox,1,4)
 topLayout.addWidget(courseLabel,0,4)
 refFont=QFont()
-#refFont.setBold(True)
 refFont.setBold(True)
 refreshButton = QPushButton('⟳')
 refreshButton.setFont(refFont)

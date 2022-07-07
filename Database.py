@@ -116,7 +116,7 @@ class Database(object):
         a=cursor.fetchall()
         db1.close()
         return(a[0][0])
-#expiry of 1900-01-01 will be handled as does not expire
+    #expiry of 1900-01-01 will be handled as does not expire
     def insertCourse(self,CourseName,DateTaken,Expiry,Instructor):
         try:
             load_dotenv()
@@ -230,14 +230,14 @@ class Database(object):
     def __init__(self):
         load_dotenv()
         db1 = MS.connect(host="localhost",user=os.getenv('USER'),passwd=os.getenv("PASSWORD"))
-        print("Connecting to database: "+os.getenv('DATABASE'))
         cursor = db1.cursor()
         #create database if it does not exist
         try:
+            
             sql = str('CREATE DATABASE '+os.getenv('DATABASE'))
             cursor.execute(sql)
         except:
-            print('Database already exists, continuing')
+            pass
 
         db1 = MS.connect(host="localhost",user=os.getenv('USER'),passwd=os.getenv("PASSWORD"),database=os.getenv('DATABASE'))
         cursor = db1.cursor()
