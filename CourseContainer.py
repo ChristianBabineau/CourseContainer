@@ -1,9 +1,13 @@
+from fileinput import filename
+from tkinter import Toplevel
+from turtle import update
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 from Person import Person
 from Course import Course
 from Database import Database
+import SpreadSheetConstructor
 import qdarkgraystyle
 
 #pyinstaller C:\Users\Christian\Desktop\Work\CourseContainer.py --onefile
@@ -488,6 +492,186 @@ class NewCourseWidget(QWidget):
         masterLayout.addWidget(submitButton)
         self.setLayout(masterLayout)
 
+class spreadSheetWidget(QWidget):
+    def closeEvent(self, event):
+        for w in windowList:
+            if type(w) ==type(spreadSheetWidget()):
+                windowList.remove(w)
+                return
+
+    def __init__(self):
+        #slots
+       
+        def addListItem(p):
+            t = QPersonWidget(p)
+            myQListWidgetItem = QListWidgetItem(searchList)
+            myQListWidgetItem.setSizeHint(t.sizeHint())
+            searchList.addItem(myQListWidgetItem)
+            searchList.setItemWidget(myQListWidgetItem, t)
+            
+        def search_clicked():
+            searchList.clear()
+            pList = db.selectPerson(firstNameLine.text(),middleInitialLine.text(),lastNameLine.text(),companyBox.currentText(),courseBox.currentText())
+            for p in pList:
+                addListItem(p)
+            firstNameLine.clear()
+            middleInitialLine.clear()
+            lastNameLine.clear()
+            #refresh_clicked()
+        
+        def add_clicked():
+            if len(searchList.selectedItems())<1:
+                return
+            p=searchList.itemWidget(searchList.selectedItems()[0]).person
+            searchList.takeItem(searchList.currentRow())
+            t= QPersonWidget(p)
+            myQListWidgetItem = QListWidgetItem(addList)
+            myQListWidgetItem.setSizeHint(t.sizeHint())
+            addList.addItem(myQListWidgetItem)
+            addList.setItemWidget(myQListWidgetItem,t)
+      
+        def remove_clicked():
+            if len(addList.selectedItems())<1:
+                return
+            p=addList.itemWidget(addList.selectedItems()[0]).person
+            addList.takeItem(addList.currentRow())
+            t= QPersonWidget(p)
+            myQListWidgetItem = QListWidgetItem(searchList)
+            myQListWidgetItem.setSizeHint(t.sizeHint())
+            searchList.addItem(myQListWidgetItem)
+            searchList.setItemWidget(myQListWidgetItem,t)
+        
+        def all_clicked():
+            if searchList.count()<1:
+                return
+            for i in range(0,searchList.count()):
+                p=searchList.itemWidget(searchList.item(i)).person
+                t= QPersonWidget(p)
+                myQListWidgetItem = QListWidgetItem(addList)
+                myQListWidgetItem.setSizeHint(t.sizeHint())
+                addList.addItem(myQListWidgetItem)
+                addList.setItemWidget(myQListWidgetItem,t)
+            searchList.clear()
+        def create_clicked():
+            idList=[]
+            for i in range(0,addList.count()):
+                p=addList.itemWidget(addList.item(i)).person
+                idList.append(p)
+            SpreadSheetConstructor.createSheet(idList)
+        super().__init__()
+
+        #setting layouts
+        masterLayout=QVBoxLayout()
+        topLayout=QHBoxLayout()
+        midLayout=QHBoxLayout()
+        bottomLayout=QHBoxLayout()
+        bottomFirstColumnLayout=QVBoxLayout()
+        bottomSecondColumnLayout=QVBoxLayout()
+        bottomLastColumnLayout=QVBoxLayout()
+
+        #top layout widgets
+        firstNameLabel = QLabel('First Name')
+        firstNameLine = QLineEdit()
+        middleInitialLabel = QLabel('Initial')
+        middleInitialLine = QLineEdit()
+        middleInitialLine.setMaxLength(1)
+        lastNameLabel = QLabel('Last Name')
+        lastNameLine = QLineEdit()
+        companyLabel = QLabel('Company')
+        companyBox = QComboBox()
+        companyBox.setMinimumWidth(120)
+        companyBox.setMaximumWidth(150)
+        companyList = db.selectUniqueCompany()
+        companyBox.addItem('')
+        for x in companyList:
+            companyBox.addItem(x)
+        courseLabel = QLabel('Course')
+        courseBox = QComboBox()
+        courseBox.setMinimumWidth(120)
+        courseBox.setMaximumWidth(150)
+        courseList = db.selectUniqueCourse()
+        courseBox.addItem('')
+        for x in courseList:
+            courseBox.addItem(x)
+        searchButton=QPushButton("Search")
+        searchButton.clicked.connect(search_clicked)
+        #add widgets to top layout
+        topLayout.setAlignment(Qt.AlignRight)
+        topLayout.addWidget(firstNameLabel)
+        topLayout.addWidget(firstNameLine)
+        topLayout.addWidget(middleInitialLabel)
+        topLayout.addWidget(middleInitialLine)
+        topLayout.addWidget(lastNameLabel)
+        topLayout.addWidget(lastNameLine)
+        topLayout.addWidget(companyLabel)
+        topLayout.addWidget(companyBox)
+        topLayout.addWidget(courseLabel)
+        topLayout.addWidget(courseBox)
+        topLayout.addWidget(searchButton)
+
+        #create mid layouts
+        midButtonsLayout=QVBoxLayout()
+
+        #mid level widgets
+        addList = QListWidget()
+        #addList.setSelectionMode(3)
+        searchList = QListWidget()
+        searchList.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        addButton = QPushButton('<<')
+        addButton.clicked.connect(add_clicked)
+        removeButton=QPushButton('>>')
+        removeButton.clicked.connect(remove_clicked)
+        addAllButton=QPushButton('< ALL <')
+        addAllButton.clicked.connect(all_clicked)
+
+        #add widgets to mid layouts
+        midButtonsLayout.addWidget(addButton)
+        midButtonsLayout.addWidget(removeButton)
+        midButtonsLayout.addWidget(addAllButton)
+        midLayout.addWidget(addList)
+        midLayout.addLayout(midButtonsLayout)
+        midLayout.addWidget(searchList)
+
+        #creating bottom first Column widgets
+        fileNameLabel=QLabel('FileName')
+        fileNameLine=QLineEdit()
+        fileNameUpdateButton=QPushButton('Update')
+
+        #add widgets to bottom first Column layout
+        bottomFirstColumnLayout.addWidget(fileNameLabel)
+        bottomFirstColumnLayout.addWidget(fileNameLine)
+        bottomFirstColumnLayout.addWidget(fileNameUpdateButton)
+
+        #creating bottom second Column widgets
+        sheetNameLabel=QLabel('sheetName')
+        sheetNameLine=QLineEdit()
+        sheetNameUpdateButton=QPushButton('Update')
+
+        #add widgets to bottom second Column layout
+        bottomSecondColumnLayout.addWidget(sheetNameLabel)
+        bottomSecondColumnLayout.addWidget(sheetNameLine)
+        bottomSecondColumnLayout.addWidget(sheetNameUpdateButton)
+
+        #creating bottom right column widgets
+        blankLabel=QLabel('')
+        createButton=QPushButton('Create')
+        updateAllButton=QPushButton('Update All')
+
+        #add widgets to bottom right layout
+        bottomLastColumnLayout.addWidget(blankLabel)
+        bottomLastColumnLayout.addWidget(createButton)
+        createButton.clicked.connect(create_clicked)
+        bottomLastColumnLayout.addWidget(updateAllButton)
+
+        #add bottom layouts together
+        bottomLayout.addLayout(bottomFirstColumnLayout)
+        bottomLayout.addLayout(bottomSecondColumnLayout)
+        bottomLayout.addLayout(bottomLastColumnLayout)
+        #add layouts to main layout
+        masterLayout.addLayout(topLayout)
+        masterLayout.addLayout(midLayout)
+        masterLayout.addLayout(bottomLayout)
+        self.setLayout(masterLayout)
 global addCoursesToPeopleList
 addCoursesToPeopleList=[]
 global windowList
@@ -585,6 +769,18 @@ def edit_clicked():
     w.setMinimumSize(800,600)
     w.show()
     windowList.append(w)
+def sheets_Clicked():
+    global windowList
+    for window in windowList:
+        if type(window) ==type(spreadSheetWidget()):
+            window.activateWindow()
+            return
+    w=spreadSheetWidget()
+    w.setWindowTitle("Course Manager - Create Spreadsheet")
+    w.setMinimumSize(700,550)
+    w.show()
+    windowList.append(w)
+    infoLabel.setText("")
 def toggle_remove():
     if unlockCheck.isChecked():
         removeButton.setEnabled(True)
@@ -679,10 +875,10 @@ midRightLayout.setAlignment(Qt.AlignBottom)
 midLayout.addLayout(midRightLayout)
 
 #bottom layer widgets
-exportButton = QPushButton("export to JSON")
+exportButton = QPushButton("export to spreadsheet")
 exportButton.setMaximumWidth(160)
-exportButton.setToolTip('Export search results to JSON file')
-exportButton.setEnabled(False)
+exportButton.setToolTip('Open window to create spreadsheet')
+exportButton.clicked.connect(sheets_Clicked)
 bottomLeftLayout.addWidget(exportButton)
 infoLabel=QLabel("")
 bottomLeftLayout.addWidget(infoLabel)

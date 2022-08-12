@@ -20,3 +20,9 @@ class Course(object):
         if self.id!=0 and self.expiry==datetime.date(1900,1,1):
             return f"{self.name}, id: {self.id}\n\ttaken: {self.dateTaken}\texpires: never \n\tinstructor: {self.instructor}"
         return f"{self.name}, id: {self.id}\n\ttaken: {self.dateTaken}\texpires: {self.expiry} \n\tinstructor: {self.instructor}"
+
+    def getNameAndExpo(self):
+        if self.expiry==datetime.date(1900,1,1):
+            return f"{self.name}"
+        else:
+            return f"{self.name}\n{self.expiry}"
