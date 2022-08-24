@@ -9,6 +9,7 @@ from Course import Course
 from Database import Database
 import SpreadSheetConstructor
 import qdarkgraystyle
+import os.path
 
 #pyinstaller C:\Users\Christian\Desktop\Work\CourseContainer.py --onefile
 class QPersonWidget(QWidget):
@@ -553,11 +554,63 @@ class spreadSheetWidget(QWidget):
                 addList.setItemWidget(myQListWidgetItem,t)
             searchList.clear()
         def create_clicked():
+            #check if filename exists already
+            if os.path.exists(fileNameLabel.text()+'.xlsx'):
+                w=QWidget()
+                windowList.append(w)
+                eLay=QHBoxLayout()
+                eLabel=QLabel("Error: file name already exists\nchange it or move the file to a different directory")
+                eLay.addWidget(eLabel)
+                w.setLayout(eLay)
+                w.setWindowTitle("Error")
+                w.setMinimumSize(200,100)
+                w.show()
+                return
             idList=[]
             for i in range(0,addList.count()):
                 p=addList.itemWidget(addList.item(i)).person
                 idList.append(p)
-            SpreadSheetConstructor.createSheet(idList)
+
+            SpreadSheetConstructor.createSheet(idList,fileNameLabel.text(),sheetNameLabel.text())
+            w=QWidget()
+            windowList.append(w)
+            eLay=QHBoxLayout()
+            eLabel=QLabel("Successfully created spreadsheet "+fileNameLabel.text()+"\n"+os.path.abspath(fileNameLabel.text()+".xlsx"))
+            eLay.addWidget(eLabel)
+            w.setLayout(eLay)
+            w.setWindowTitle("Success")
+            w.setMinimumSize(200,100)
+            w.show()
+        def update_fileName():
+            if fileNameLine.text()!="":
+                fileNameLabel.setText(fileNameLine.text())
+            else:
+                w=QWidget()
+                windowList.append(w)
+                eLay=QHBoxLayout()
+                eLabel=QLabel("Error: file name cannot be blank")
+                eLay.addWidget(eLabel)
+                w.setLayout(eLay)
+                w.setWindowTitle("Error")
+                w.setMinimumSize(200,100)
+                w.show()
+        def update_sheetName():
+            if sheetNameLine.text()!="":
+                sheetNameLabel.setText(sheetNameLine.text())
+            else:
+                w=QWidget()
+                windowList.append(w)
+                eLay=QHBoxLayout()
+                eLabel=QLabel("Error: sheet name cannot be blank")
+                eLay.addWidget(eLabel)
+                w.setLayout(eLay)
+                w.setWindowTitle("Error")
+                w.setMinimumSize(200,100)
+                w.show()
+        
+        def update_all():
+            update_fileName()
+            update_sheetName()
         super().__init__()
 
         #setting layouts
@@ -633,9 +686,10 @@ class spreadSheetWidget(QWidget):
         midLayout.addWidget(searchList)
 
         #creating bottom first Column widgets
-        fileNameLabel=QLabel('FileName')
+        fileNameLabel=QLabel('File Name')
         fileNameLine=QLineEdit()
         fileNameUpdateButton=QPushButton('Update')
+        fileNameUpdateButton.clicked.connect(update_fileName)
 
         #add widgets to bottom first Column layout
         bottomFirstColumnLayout.addWidget(fileNameLabel)
@@ -643,9 +697,10 @@ class spreadSheetWidget(QWidget):
         bottomFirstColumnLayout.addWidget(fileNameUpdateButton)
 
         #creating bottom second Column widgets
-        sheetNameLabel=QLabel('sheetName')
+        sheetNameLabel=QLabel('Sheet Name')
         sheetNameLine=QLineEdit()
         sheetNameUpdateButton=QPushButton('Update')
+        sheetNameUpdateButton.clicked.connect(update_sheetName)
 
         #add widgets to bottom second Column layout
         bottomSecondColumnLayout.addWidget(sheetNameLabel)
@@ -656,11 +711,12 @@ class spreadSheetWidget(QWidget):
         blankLabel=QLabel('')
         createButton=QPushButton('Create')
         updateAllButton=QPushButton('Update All')
+        updateAllButton.clicked.connect(update_all)
+        createButton.clicked.connect(create_clicked)
 
         #add widgets to bottom right layout
         bottomLastColumnLayout.addWidget(blankLabel)
         bottomLastColumnLayout.addWidget(createButton)
-        createButton.clicked.connect(create_clicked)
         bottomLastColumnLayout.addWidget(updateAllButton)
 
         #add bottom layouts together
@@ -672,6 +728,7 @@ class spreadSheetWidget(QWidget):
         masterLayout.addLayout(midLayout)
         masterLayout.addLayout(bottomLayout)
         self.setLayout(masterLayout)
+        search_clicked()
 global addCoursesToPeopleList
 addCoursesToPeopleList=[]
 global windowList

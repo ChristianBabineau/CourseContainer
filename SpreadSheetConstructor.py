@@ -3,8 +3,8 @@ from Database import Database
 import datetime
 #✔
 #pass in persons
-#TODO: ADD SHEET NAME AND WORKBOOK NAME FUNCTIONALITY, THEN DONE
-def createSheet(dataIn):
+
+def createSheet(dataIn,bookIn,sheetIn):
     db=Database()
     #find all unique courses and people
     personDict={}
@@ -17,11 +17,11 @@ def createSheet(dataIn):
         for c in p.courseList:
             courseDict[c.id]=c.getNameAndExpo()
     
-    bookName='TestName.xlsx'
-    workbook=xlsxwriter.Workbook(bookName)
+    
+    workbook=xlsxwriter.Workbook(bookIn+'.xlsx')
     wrap = workbook.add_format({'text_wrap': True,'align':'center','valign':'vcenter'})
     wrapOdd = workbook.add_format({'text_wrap': True,'align':'center','valign':'vcenter','bg_color':'#e0dede'})
-    worksheet=workbook.add_worksheet('test')
+    worksheet=workbook.add_worksheet(sheetIn)
     i=1
     for c in courseDict.values():
         worksheet.write(0,i,c,wrap)

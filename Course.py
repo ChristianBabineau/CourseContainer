@@ -23,6 +23,6 @@ class Course(object):
 
     def getNameAndExpo(self):
         if self.expiry==datetime.date(1900,1,1):
-            return f"{self.name}"
+            return f"{self.name}\nTKN: {self.dateTaken}"
         else:
-            return f"{self.name}\n{self.expiry}"
+            return f"{self.name}\nTKN: {self.dateTaken}\nEXP: {self.expiry}"
