@@ -6,7 +6,7 @@ class Person(object):
         self.fName=First
         self.initial=Initial
         self.lName=Last
-        self.name=str(First)+" "+str(Initial)+" "+ str(Last)
+        self.name=str(Last)+", "+str(First)+" "+ str(Initial)
         self.company = Company
         if CourseList==None:
             self.courseList=[]
